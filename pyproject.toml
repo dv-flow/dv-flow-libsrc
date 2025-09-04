@@ -1,0 +1,22 @@
+
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dv-flow-libsrc"
+version = "0.0.1"
+dependencies = [
+    "dv-flow-mgr"
+]
+authors = [
+    {name = "Matthew Ballance", email = "matt.ballance@gmail.com"},
+]
+description = "Tasks for gathering source files from various input formats"
+license = {file = "LICENSE" }
+
+[project.entry-points."dv_flow.mgr"]
+libhdlsim = "dv_flow.libsrc.__ext__"
+
+[tool.setuptools.package-data]
+"dv_flow.libsrc" = ['**/flow.dv']

@@ -1,0 +1,11 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/packages/python/bin/python3",
+    "python.analysis.extraPaths": [
+        "src"
+    ],
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+        "-s",
+        "tests/unit"
+    ]
+}

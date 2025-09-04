@@ -1,0 +1,17 @@
+package:
+  name: src
+
+  tasks:
+  - name: FileList
+    desc: "Reads a filelist and outputs a FileSet"
+    shell: pytask
+    run: dv_flow.libsrc.filelist.FileList
+    with:
+      file:
+        type: str
+      filetype:
+        type: str
+      include:
+        type: list
+      exclude:
+        type: list
