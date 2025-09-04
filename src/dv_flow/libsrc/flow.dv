@@ -11,10 +11,15 @@ package:
         type: str
       filetype:
         type: str
+      add_incdir:
+        type: bool
+        value: true
       include:
         type: list
       exclude:
         type: list
+
+
   - name: IPX-FileSet
     desc: Reads an IP-XACT file and extracts a fileset or filesets
     shell: pytask

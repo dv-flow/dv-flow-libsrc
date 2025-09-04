@@ -52,6 +52,9 @@ async def FileList(ctxt : TaskRunCtxt, input : TaskDataInput) -> TaskDataResult:
             if include_patterns and not matches_any(filename, include_patterns):
                 continue
             filelist.files.append(filename)
+
+        if input.params.add_incdir:
+            filelist.incdirs.append(filelist.basedir)
     else:
         status = 1
 
