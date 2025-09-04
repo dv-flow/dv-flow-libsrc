@@ -1,6 +1,7 @@
 import glob
 import logging
 import os
+import fnmatch
 from typing import List
 from dv_flow.mgr import TaskRunCtxt, TaskDataInput, TaskDataResult, FileSet
 from fltools import FilelistParser
@@ -33,15 +34,27 @@ async def FileList(ctxt : TaskRunCtxt, input : TaskDataInput) -> TaskDataResult:
         basedir=os.path.dirname(file[0]),
         filetype=input.params.filetype)
 
+    include_patterns = getattr(input.params, "include", [])
+    exclude_patterns = getattr(input.params, "exclude", [])
+
+    def matches_any(filename, patterns):
+        return any(fnmatch.fnmatch(filename, pat) for pat in patterns)
+
     if paths is not None:
         for path in paths:
             filename = path.resolve(expand_env=False)
             if filename.startswith(filelist.basedir):
                 filename = filename[len(filelist.basedir)+1:]
+            # Exclude filtering
+            if matches_any(filename, exclude_patterns):
+                continue
+            # Include filtering
+            if include_patterns and not matches_any(filename, include_patterns):
+                continue
             filelist.files.append(filename)
     else:
         status = 1
-    
+
     output.append(filelist)
 
     return TaskDataResult(

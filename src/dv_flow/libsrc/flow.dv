@@ -15,3 +15,12 @@ package:
         type: list
       exclude:
         type: list
+  - name: IPX-FileSet
+    desc: Reads an IP-XACT file and extracts a fileset or filesets
+    shell: pytask
+    run: dv_flow.libsrc.ipx_fileset_task.IPXFileSetTask
+    with:
+      file:
+        type: str
+      filesets:
+        type: list

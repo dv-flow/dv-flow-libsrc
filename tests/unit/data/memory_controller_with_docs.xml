@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ipxact:component xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ipxact="http://www.accellera.org/XMLSchema/IPXACT/1685-2014" xmlns:kactus2="http://kactus2.cs.tut.fi" xsi:schemaLocation="http://www.accellera.org/XMLSchema/IPXACT/1685-2014 http://www.accellera.org/XMLSchema/IPXACT/1685-2014/index.xsd">
+<ipxact:vendor>tut.fi</ipxact:vendor>
+<ipxact:library>cpu.logic</ipxact:library>
+<ipxact:name>memory_controller</ipxact:name>
+<ipxact:version>1.0</ipxact:version>
+<!-- ... (other content unchanged) ... -->
+<ipxact:fileSets>
+<ipxact:fileSet>
+<ipxact:name>verilogSource</ipxact:name>
+<ipxact:group>generatedFiles</ipxact:group>
+<ipxact:file>
+<ipxact:name>memory_controller.v</ipxact:name>
+<ipxact:fileType>verilogSource</ipxact:fileType>
+<ipxact:description>Generated at 15:08:08 on 27.07.2017 by Kactus2. </ipxact:description>
+<ipxact:vendorExtensions>
+<kactus2:hash>a00df7c8f2494bc20249786ca3ea2c8a3df34ebc</kactus2:hash>
+</ipxact:vendorExtensions>
+</ipxact:file>
+</ipxact:fileSet>
+<ipxact:fileSet>
+<ipxact:name>docs</ipxact:name>
+<ipxact:group>documentation</ipxact:group>
+<ipxact:file>
+<ipxact:name>readme.txt</ipxact:name>
+<ipxact:fileType>text</ipxact:fileType>
+<ipxact:description>Documentation file.</ipxact:description>
+</ipxact:file>
+</ipxact:fileSet>
+</ipxact:fileSets>
+<!-- ... (other content unchanged) ... -->
+</ipxact:component>
