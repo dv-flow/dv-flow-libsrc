@@ -43,12 +43,22 @@ async def FileList(ctxt : TaskRunCtxt, input : TaskDataInput) -> TaskDataResult:
         for path in paths:
             # Detect +incdir+<path> tokens
             if hasattr(path, "img") and isinstance(path.img, str) and path.img.startswith("+incdir+"):
-                incdir_path = path.img[len("+incdir+") :]
-                # Make incdir path relative to basedir if not absolute
-                if not os.path.isabs(incdir_path):
-                    incdir_path = os.path.normpath(os.path.join(basedir, incdir_path))
-                # Store incdir relative to common base (will be set below)
-                incdirs.add(incdir_path)
+                # Strip +incdir+ prefix before resolving
+                incdir_img = path.img
+                while incdir_img.startswith("+incdir+"):
+                    incdir_img = incdir_img[len("+incdir+") :]
+                # Use resolve to expand env vars on the stripped value
+                if hasattr(path, "resolve"):
+                    # Temporarily patch path.img for resolve
+                    orig_img = path.img
+                    path.img = incdir_img
+                    incdir_path = path.resolve(expand_env=True)
+                    path.img = orig_img
+                else:
+                    incdir_path = incdir_img
+                # Always use only the leaf directory name for incdir
+                leaf_incdir = os.path.basename(os.path.normpath(incdir_path))
+                incdirs.add(leaf_incdir)
                 continue
 
             filename = path.resolve(expand_env=True)
@@ -73,11 +83,10 @@ async def FileList(ctxt : TaskRunCtxt, input : TaskDataInput) -> TaskDataResult:
             fs = FileSet(basedir=common_base, filetype=input.params.filetype)
             if input.params.add_incdir:
                 fs.incdirs.append(".")
-            # Add detected incdirs, relative to common_base
+            # Add detected incdirs as just the leaf directory name
             for incdir in incdirs:
-                rel_incdir = os.path.relpath(incdir, common_base)
-                if rel_incdir not in fs.incdirs:
-                    fs.incdirs.append(rel_incdir)
+                if incdir not in fs.incdirs:
+                    fs.incdirs.append(incdir)
 
             for f in full_paths:
                 fs.files.append(f[len(fs.basedir)+1:])

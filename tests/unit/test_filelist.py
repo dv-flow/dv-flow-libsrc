@@ -116,3 +116,23 @@ def test_filelist_incdir_absolute(tmpdir, dvflow):
     assert "subdir_abs" in out.output[0].incdirs
     assert abs_incdir not in out.output[0].incdirs
     assert "subdir_abs/file.sv" in out.output[0].files
+
+def test_filelist_incdir_env_var(tmpdir, dvflow):
+    import os
+    # Set environment variable
+    env = os.environ.copy()
+    env["MYINCDIR"] = "envincdir"
+    # Create the directory and file
+    incdir = os.path.join(tmpdir, "envincdir")
+    os.makedirs(incdir)
+    with open(os.path.join(incdir, "file.sv"), "w") as fp:
+        fp.write("// dummy SV file")
+    # Write filelist with +incdir+$MYINCDIR and a file in envincdir
+    write_flow(tmpdir)
+    write_filelist(tmpdir, ["+incdir+$MYINCDIR", "envincdir/file.sv"])
+    status, out = dvflow.runFlow(os.path.join(tmpdir, "flow.dv"), "foo.files", env=env)
+    assert status == 0
+    # Should expand env var and return only the leaf directory name in incdirs
+    assert "envincdir" in out.output[0].incdirs
+    assert "$MYINCDIR" not in out.output[0].incdirs
+    assert "envincdir/file.sv" in out.output[0].files
