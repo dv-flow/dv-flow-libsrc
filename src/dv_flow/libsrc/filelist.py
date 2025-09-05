@@ -14,7 +14,6 @@ async def FileList(ctxt : TaskRunCtxt, input : TaskDataInput) -> TaskDataResult:
     path = input.params.file
     if not os.path.isabs(path):
         path = os.path.join(input.srcdir, path)
-    print("Path: %s (%s)" % (path, input.params.file))
 
     file = glob.glob(path, recursive=True)
 
@@ -30,9 +29,7 @@ async def FileList(ctxt : TaskRunCtxt, input : TaskDataInput) -> TaskDataResult:
         relative_path_basedir=os.path.dirname(file[0])
     )
 
-    filelist = FileSet(
-        basedir=os.path.dirname(file[0]),
-        filetype=input.params.filetype)
+    basedir = os.path.dirname(file[0])
 
     include_patterns = getattr(input.params, "include", [])
     exclude_patterns = getattr(input.params, "exclude", [])
@@ -41,24 +38,40 @@ async def FileList(ctxt : TaskRunCtxt, input : TaskDataInput) -> TaskDataResult:
         return any(fnmatch.fnmatch(filename, pat) for pat in patterns)
 
     if paths is not None:
+        full_paths = []
         for path in paths:
-            filename = path.resolve(expand_env=False)
-            if filename.startswith(filelist.basedir):
-                filename = filename[len(filelist.basedir)+1:]
+            filename = path.resolve(expand_env=True)
+            if not os.path.isabs(filename):
+                filename = os.path.join(basedir, filename)
+
             # Exclude filtering
             if matches_any(filename, exclude_patterns):
                 continue
             # Include filtering
             if include_patterns and not matches_any(filename, include_patterns):
                 continue
-            filelist.files.append(filename)
 
-        if input.params.add_incdir:
-            filelist.incdirs.append(filelist.basedir)
+            full_paths.append(filename)
+
+        if len(full_paths) > 0:
+            if len(full_paths) > 1:
+                common_base = os.path.commonpath(full_paths)
+            else:
+                common_base = basedir
+
+            fs = FileSet(basedir=common_base, filetype=input.params.filetype)
+            if input.params.add_incdir:
+                fs.incdirs.append(fs.basedir)
+
+#        for inc in parser.include_s:
+#            fs.incdirs.append(inc[])
+
+            for f in full_paths:
+                fs.files.append(f[len(fs.basedir)+1:])
+            output.append(fs)
     else:
         status = 1
 
-    output.append(filelist)
 
     return TaskDataResult(
         status=status,
