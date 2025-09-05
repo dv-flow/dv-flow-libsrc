@@ -84,3 +84,35 @@ def test_filelist_env_var(tmpdir, dvflow):
     status, out = dvflow.runFlow(os.path.join(tmpdir, "flow.dv"), "foo.files", env=env)
     assert status == 0
     assert sorted(out.output[0].files) == ["envdir/file.txt"]
+
+def test_filelist_incdir(tmpdir, dvflow):
+    # Create a subdirectory and a file in it
+    subdir = os.path.join(tmpdir, "subdir")
+    os.makedirs(subdir)
+    with open(os.path.join(subdir, "file.sv"), "w") as fp:
+        fp.write("// dummy SV file")
+    # Write filelist with +incdir+subdir and a file in subdir
+    write_flow(tmpdir)
+    write_filelist(tmpdir, ["+incdir+subdir", "subdir/file.sv"])
+    status, out = dvflow.runFlow(os.path.join(tmpdir, "flow.dv"), "foo.files")
+    assert status == 0
+    # Should find the file and incdir
+    assert "subdir" in out.output[0].incdirs
+    assert "subdir/file.sv" in out.output[0].files
+
+def test_filelist_incdir_absolute(tmpdir, dvflow):
+    # Create a subdirectory and a file in it
+    subdir = os.path.join(tmpdir, "subdir_abs")
+    os.makedirs(subdir)
+    with open(os.path.join(subdir, "file.sv"), "w") as fp:
+        fp.write("// dummy SV file")
+    # Write filelist with +incdir+<absolute path>
+    abs_incdir = os.path.abspath(subdir)
+    write_flow(tmpdir)
+    write_filelist(tmpdir, [f"+incdir+{abs_incdir}", f"subdir_abs/file.sv"])
+    status, out = dvflow.runFlow(os.path.join(tmpdir, "flow.dv"), "foo.files")
+    assert status == 0
+    # Should return only the leaf directory name in incdirs
+    assert "subdir_abs" in out.output[0].incdirs
+    assert abs_incdir not in out.output[0].incdirs
+    assert "subdir_abs/file.sv" in out.output[0].files

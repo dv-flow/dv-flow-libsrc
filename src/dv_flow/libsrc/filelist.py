@@ -39,7 +39,18 @@ async def FileList(ctxt : TaskRunCtxt, input : TaskDataInput) -> TaskDataResult:
 
     if paths is not None:
         full_paths = []
+        incdirs = set()
         for path in paths:
+            # Detect +incdir+<path> tokens
+            if hasattr(path, "img") and isinstance(path.img, str) and path.img.startswith("+incdir+"):
+                incdir_path = path.img[len("+incdir+") :]
+                # Make incdir path relative to basedir if not absolute
+                if not os.path.isabs(incdir_path):
+                    incdir_path = os.path.normpath(os.path.join(basedir, incdir_path))
+                # Store incdir relative to common base (will be set below)
+                incdirs.add(incdir_path)
+                continue
+
             filename = path.resolve(expand_env=True)
             if not os.path.isabs(filename):
                 filename = os.path.join(basedir, filename)
@@ -62,9 +73,11 @@ async def FileList(ctxt : TaskRunCtxt, input : TaskDataInput) -> TaskDataResult:
             fs = FileSet(basedir=common_base, filetype=input.params.filetype)
             if input.params.add_incdir:
                 fs.incdirs.append(".")
-
-#        for inc in parser.include_s:
-#            fs.incdirs.append(inc[])
+            # Add detected incdirs, relative to common_base
+            for incdir in incdirs:
+                rel_incdir = os.path.relpath(incdir, common_base)
+                if rel_incdir not in fs.incdirs:
+                    fs.incdirs.append(rel_incdir)
 
             for f in full_paths:
                 fs.files.append(f[len(fs.basedir)+1:])
