@@ -136,3 +136,23 @@ def test_filelist_incdir_env_var(tmpdir, dvflow):
     assert "envincdir" in out.output[0].incdirs
     assert "$MYINCDIR" not in out.output[0].incdirs
     assert "envincdir/file.sv" in out.output[0].files
+
+def test_filelist_incdir_multilevel(tmpdir, dvflow):
+    import os
+    # Create nested directories foo/bar/baz and a file in the leaf
+    leaf_dir = os.path.join(tmpdir, "foo", "bar", "baz")
+    os.makedirs(leaf_dir)
+    file_path = os.path.join("foo", "bar", "baz", "file.sv")
+    with open(os.path.join(tmpdir, file_path), "w") as fp:
+        fp.write("// dummy SV file")
+    # Set ROOT env var to the filelist's basedir
+    env = os.environ.copy()
+    env["ROOT"] = str(tmpdir)
+    # Write filelist with +incdir+${ROOT}/foo/bar/baz and the file
+    write_flow(tmpdir)
+    write_filelist(tmpdir, [f"+incdir+${{ROOT}}/foo/bar/baz", file_path])
+    status, out = dvflow.runFlow(os.path.join(tmpdir, "flow.dv"), "foo.files", env=env)
+    assert status == 0
+    # Should return only the leaf path in incdirs
+    assert "foo/bar/baz" in out.output[0].incdirs
+    assert f"foo/bar/baz/file.sv" in out.output[0].files

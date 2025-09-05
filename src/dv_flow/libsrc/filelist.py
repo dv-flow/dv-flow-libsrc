@@ -56,9 +56,9 @@ async def FileList(ctxt : TaskRunCtxt, input : TaskDataInput) -> TaskDataResult:
                     path.img = orig_img
                 else:
                     incdir_path = incdir_img
-                # Always use only the leaf directory name for incdir
-                leaf_incdir = os.path.basename(os.path.normpath(incdir_path))
-                incdirs.add(leaf_incdir)
+                # Add the relative path from basedir to incdir_path
+                rel_incdir = os.path.relpath(os.path.normpath(incdir_path), basedir)
+                incdirs.add(rel_incdir)
                 continue
 
             filename = path.resolve(expand_env=True)
