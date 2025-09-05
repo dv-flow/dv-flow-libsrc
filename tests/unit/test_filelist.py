@@ -67,3 +67,20 @@ def test_filelist_exclude_all(tmpdir, dvflow):
     status, out = dvflow.runFlow(os.path.join(tmpdir, "flow.dv"), "foo.files")
     assert status == 0
     assert len(out.output) == 0 or len(out.output[0].files) == 0
+
+def test_filelist_env_var(tmpdir, dvflow):
+    import os
+    # Set env variable in both dvflow and os.environ
+    env = os.environ.copy()
+    env["FOO"] = "envdir"
+
+    # Create the directory and file
+    envdir = os.path.join(tmpdir, "envdir")
+    os.makedirs(envdir)
+    with open(os.path.join(envdir, "file.txt"), "w") as fp:
+        fp.write("test")
+    write_flow(tmpdir)
+    write_filelist(tmpdir, ["$FOO/file.txt"])
+    status, out = dvflow.runFlow(os.path.join(tmpdir, "flow.dv"), "foo.files", env=env)
+    assert status == 0
+    assert sorted(out.output[0].files) == ["envdir/file.txt"]

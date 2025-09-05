@@ -23,7 +23,7 @@ async def FileList(ctxt : TaskRunCtxt, input : TaskDataInput) -> TaskDataResult:
         raise Exception("Input file \"%s\" does not exist" % file[0])
 
 
-    parser = FilelistParser()
+    parser = FilelistParser(env=ctxt.env)
     paths = parser.parse(
         path=file[0],
         relative_path_basedir=os.path.dirname(file[0])
