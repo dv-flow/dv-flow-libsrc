@@ -61,7 +61,7 @@ async def FileList(ctxt : TaskRunCtxt, input : TaskDataInput) -> TaskDataResult:
 
             fs = FileSet(basedir=common_base, filetype=input.params.filetype)
             if input.params.add_incdir:
-                fs.incdirs.append(fs.basedir)
+                fs.incdirs.append(".")
 
 #        for inc in parser.include_s:
 #            fs.incdirs.append(inc[])
